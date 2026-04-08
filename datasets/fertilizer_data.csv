@@ -1,0 +1,4 @@
+nutrient,fertilizer_name,nutrient_percent,price_per_kg_inr
+N,Urea,0.46,6
+P,DAP,0.46,25
+K,MOP,0.60,15

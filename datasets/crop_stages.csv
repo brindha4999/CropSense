@@ -1,0 +1,67 @@
+crop,stage_number,stage_name,days_from_sowing,N_percent,P_percent,K_percent,notes
+rice,1,Basal (Pre-transplant),0,20,50,30,Apply before transplanting and incorporate into soil
+rice,2,Tillering,21,50,25,30,Side-dress when tillers begin to appear
+rice,3,Panicle Initiation,45,30,25,40,Apply at boot stage for grain filling
+maize,1,Basal (Sowing),0,25,60,40,Apply in furrow at sowing
+maize,2,Knee-high Stage,25,45,25,35,Top-dress when plant is knee-high
+maize,3,Tasseling,50,30,15,25,Apply before tasseling for yield boost
+wheat,1,Basal (Sowing),0,30,60,50,Apply before sowing and incorporate
+wheat,2,Crown Root Initiation,21,40,25,30,Critical stage for tiller development
+wheat,3,Jointing,45,30,15,20,Apply at stem elongation stage
+chickpea,1,Basal (Sowing),0,50,60,50,Full P and K at sowing; minimal N for legume
+chickpea,2,Branching,30,50,40,50,Light top-dress to support branching
+kidneybeans,1,Basal (Sowing),0,40,60,50,Apply at sowing
+kidneybeans,2,Flowering,35,60,40,50,Top-dress at first flower
+pigeonpeas,1,Basal (Sowing),0,40,50,40,Apply at sowing
+pigeonpeas,2,Branching,30,30,30,30,Top-dress at branching
+pigeonpeas,3,Pod Formation,70,30,20,30,Apply at pod initiation
+mothbeans,1,Basal (Sowing),0,60,70,60,Full dose at sowing
+mothbeans,2,Flowering,30,40,30,40,Light top-dress
+mungbean,1,Basal (Sowing),0,60,70,60,Full dose at sowing
+mungbean,2,Flowering,25,40,30,40,Light top-dress at flowering
+blackgram,1,Basal (Sowing),0,60,70,60,Full dose at sowing
+blackgram,2,Flowering,28,40,30,40,Top-dress at flowering
+lentil,1,Basal (Sowing),0,50,60,50,Apply at sowing
+lentil,2,Branching,30,50,40,50,Top-dress at branching
+pomegranate,1,Pre-planting,0,20,40,25,Apply during pit preparation
+pomegranate,2,Post-harvest / New Flush,180,40,30,35,After harvest before new growth
+pomegranate,3,Fruit Development,270,40,30,40,Apply at fruit set stage
+banana,1,Planting,0,20,30,20,At planting in pit
+banana,2,Shooting (3 months),90,30,30,30,Active vegetative growth
+banana,3,Bunch Emergence (6 months),180,30,20,25,At bunch emergence
+banana,4,Fruit Fill (9 months),270,20,20,25,Final stage for fruit quality
+mango,1,Pre-flowering,0,30,40,30,Before flowering season
+mango,2,Fruit Set,60,30,30,35,At fruit set stage
+mango,3,Fruit Development,120,40,30,35,During active fruit growth
+grapes,1,Pruning (Dormant),0,25,40,30,At pruning / pre-season
+grapes,2,Berry Set,60,40,30,35,After fruit set
+grapes,3,Veraison,100,35,30,35,At colour change stage
+watermelon,1,Basal (Sowing),0,30,50,35,At sowing in furrow
+watermelon,2,Vining,20,40,30,35,At vine elongation
+watermelon,3,Fruit Set,40,30,20,30,At fruit set
+muskmelon,1,Basal (Sowing),0,30,50,35,At sowing
+muskmelon,2,Vining,20,40,25,30,At vine elongation
+muskmelon,3,Fruit Development,40,30,25,35,At fruit set
+apple,1,Dormant / Pre-bloom,0,30,40,30,Apply before bud break
+apple,2,Petal Fall,45,35,30,35,After petal fall
+apple,3,Fruit Swell,90,35,30,35,At fruit sizing stage
+orange,1,Pre-flowering,0,30,40,30,Before flowering
+orange,2,Fruit Set,60,35,30,35,At fruit set
+orange,3,Fruit Development,120,35,30,35,During fruit growth
+papaya,1,Planting,0,25,40,25,At planting
+papaya,2,Vegetative (2 months),60,35,30,30,Active growth phase
+papaya,3,Flowering (4 months),120,25,20,25,At first flowering
+papaya,4,Fruiting (6 months),180,15,10,20,Fruit development stage
+coconut,1,Pre-monsoon,0,30,35,30,Before monsoon rains
+coconut,2,Post-monsoon,180,35,30,35,After monsoon
+coconut,3,Summer,300,35,35,35,Summer application
+cotton,1,Basal (Sowing),0,25,50,40,At sowing
+cotton,2,Square Formation,45,40,25,30,At squaring stage
+cotton,3,Boll Development,75,35,25,30,At boll formation
+jute,1,Basal (Sowing),0,30,50,40,At sowing
+jute,2,Vegetative (30 days),30,40,30,35,Rapid growth phase
+jute,3,Pre-harvest (60 days),60,30,20,25,Final top-dress
+coffee,1,Pre-monsoon,0,25,40,25,Before first rains
+coffee,2,Post-monsoon,120,35,30,35,Post-harvest stage
+coffee,3,Berry Development,180,25,20,25,During berry growth
+coffee,4,Pre-harvest,270,15,10,15,Final stage

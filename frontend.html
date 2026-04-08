@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CropSense — Smart Crop Advisor</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --soil:   #faf6ee;
+    --earth:  #eee8d5;
+    --bark:   #b8cca0;
+    --clay:   #555555;
+    --straw:  #333333;
+    --cream:  #111111;
+    --leaf:   #2d6e28;
+    --sprout: #3a9a34;
+    --sky:    #3a8aaa;
+    --sun:    #b87c10;
+    --red:    #b83228;
+    --muted:  rgba(0,0,0,0.45);
+  }
+
+  body {
+    background: var(--soil);
+    color: var(--cream);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; opacity: 0.15;
+  }
+
+  .page {
+    position: relative; z-index: 1;
+    max-width: 960px; margin: 0 auto;
+    padding: 52px 24px 100px;
+  }
+
+  /* ── Header ── */
+  header { margin-bottom: 48px; }
+  .header-label {
+    font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase;
+    color: #000000; opacity: 1; margin-bottom: 10px;
+  }
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.8rem, 8vw, 5rem);
+    font-weight: 900; line-height: 0.9; letter-spacing: -0.02em;
+  }
+  h1 span { color: var(--sprout); display: block; }
+  .divider { width: 48px; height: 2px; background: var(--sprout); margin: 20px 0; }
+  .header-sub {
+    font-size: 11px; color: #000000; opacity: 1;
+    letter-spacing: 0.05em; max-width: 400px; line-height: 1.9;
+  }
+
+  /* ── Tabs ── */
+  .tabs {
+    display: flex; gap: 0; margin-bottom: 36px;
+    border-bottom: 1px solid var(--bark);
+  }
+  .tab-btn {
+    background: none; border: none; border-bottom: 2px solid transparent;
+    margin-bottom: -1px; padding: 12px 24px;
+    font-family: 'DM Mono', monospace; font-size: 10px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: #000000; opacity: 1; cursor: pointer;
+    transition: color 0.2s, opacity 0.2s, border-color 0.2s;
+  }
+  .tab-btn:hover { opacity: 1; color: var(--sprout); }
+  .tab-btn.active {
+    color: var(--sprout); opacity: 1;
+    border-bottom-color: var(--sprout);
+  }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── Form grid ── */
+  .form-grid {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; margin-bottom: 18px;
+  }
+  @media(max-width: 640px) {
+    .form-grid { grid-template-columns: 1fr 1fr; }
+    .span-2 { grid-column: span 2; }
+  }
+  .field label {
+    display: block; font-size: 10px; letter-spacing: 0.2em;
+    text-transform: uppercase; color: #000000; opacity: 1; margin-bottom: 7px;
+  }
+  .field-unit { font-size: 9px; opacity: 0.7; margin-left: 5px; }
+  .field input {
+    width: 100%; background: var(--earth); border: 1px solid var(--bark);
+    border-radius: 6px; padding: 13px 15px; color: #111111;
+    font-family: 'DM Mono', monospace; font-size: 15px;
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    outline: none; -webkit-appearance: none;
+  }
+  .field input::placeholder { color: #888888; font-size: 12px; }
+  .field input:focus {
+    border-color: var(--sprout); background: #e8f5e0;
+    box-shadow: 0 0 0 3px rgba(74,170,68,0.12);
+  }
+  .field input:valid:not(:placeholder-shown) { border-color: rgba(74,170,68,0.5); }
+
+  /* ── Buttons ── */
+  .btn-submit {
+    width: 100%; margin-top: 28px; padding: 18px;
+    background: var(--leaf); border: none; border-radius: 7px;
+    color: #ffffff; font-family: 'DM Mono', monospace;
+    font-size: 11px; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase;
+    cursor: pointer; transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+    position: relative; overflow: hidden;
+  }
+  .btn-submit:hover { background: var(--sprout); box-shadow: 0 6px 20px rgba(74,170,68,0.3); transform: translateY(-1px); }
+  .btn-submit:active { transform: none; }
+  .btn-submit:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+  .btn-submit .spinner {
+    display: none; width: 15px; height: 15px;
+    border: 2px solid rgba(255,255,255,0.3); border-top-color: white;
+    border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto;
+  }
+  .btn-submit.loading .spinner { display: block; }
+  .btn-submit.loading .btn-text { display: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Result card ── */
+  #result-container {
+    margin-top: 40px; opacity: 0; transform: translateY(16px);
+    transition: opacity 0.45s ease, transform 0.45s ease; pointer-events: none;
+  }
+  #result-container.visible { opacity: 1; transform: none; pointer-events: all; }
+  .result-card {
+    background: linear-gradient(145deg, var(--earth), #e5f0d8);
+    border: 1px solid var(--bark); border-radius: 12px; padding: 36px;
+    position: relative; overflow: hidden;
+  }
+  .result-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--leaf), var(--sprout), var(--sky));
+  }
+  .bg-icon {
+    position: absolute; right: 28px; top: 50%; transform: translateY(-50%);
+    font-size: 72px; opacity: 0.07; pointer-events: none;
+  }
+  .result-eyebrow {
+    font-size: 9px; letter-spacing: 0.25em; text-transform: uppercase;
+    color: var(--sprout); margin-bottom: 6px;
+  }
+  .result-crop {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.2rem, 6vw, 4rem);
+    font-weight: 700; color: #111111; line-height: 1;
+    margin-bottom: 28px; text-transform: capitalize;
+  }
+  .result-meta {
+    display: grid; grid-template-columns: repeat(3,1fr); gap: 14px;
+    margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--bark);
+  }
+  @media(max-width: 500px) { .result-meta { grid-template-columns: 1fr 1fr; } }
+  .meta-label { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: #000000; opacity: 1; margin-bottom: 5px; }
+  .meta-value { font-size: 13px; color: #111111; font-weight: 500; }
+  .meta-value.highlight { color: var(--sun); }
+
+  /* ── Error ── */
+  .error-card {
+    background: rgba(180,50,40,0.08); border: 1px solid rgba(180,50,40,0.25);
+    border-radius: 7px; padding: 18px 22px; font-size: 12px; color: #8a2020;
+    margin-top: 40px; display: none; animation: fadeIn 0.3s ease;
+  }
+  .error-card.visible { display: block; }
+  @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+
+  /* ════════════════════════════════════
+     PHASE 4 — RECOMMENDATION RESULT
+  ════════════════════════════════════ */
+
+  /* Section label */
+  .section-label {
+    font-size: 9px; letter-spacing: 0.25em; text-transform: uppercase;
+    color: var(--sprout); margin-bottom: 14px; margin-top: 36px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-label::after { content:''; flex:1; height:1px; background:var(--bark); }
+
+  /* ── Best Crop Card ── */
+  .best-card {
+    background: linear-gradient(145deg, var(--earth), #e5f0d8);
+    border: 1px solid var(--bark); border-radius: 14px; padding: 32px;
+    position: relative; overflow: hidden; margin-bottom: 10px;
+  }
+  .best-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:3px;
+    background: linear-gradient(90deg, var(--leaf), var(--sprout), var(--sky));
+  }
+  .best-crop-row {
+    display: flex; align-items: center; gap: 18px; margin-bottom: 24px;
+  }
+  .best-emoji { font-size: 56px; line-height: 1; }
+  .best-crop-name {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 700; color: #111; line-height: 1; text-transform: capitalize;
+  }
+  .best-badge {
+    display: inline-block; background: var(--sprout); color: #fff;
+    font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase;
+    padding: 3px 10px; border-radius: 20px; margin-left: 4px; vertical-align: middle;
+  }
+  .best-reason {
+    font-size: 11px; color: #444; line-height: 1.8; letter-spacing: 0.03em;
+    background: rgba(74,170,68,0.07); border-left: 3px solid var(--sprout);
+    padding: 10px 14px; border-radius: 0 6px 6px 0; margin-bottom: 24px;
+  }
+  .meta-grid {
+    display: grid; grid-template-columns: repeat(3,1fr); gap: 14px;
+    padding-top: 20px; border-top: 1px solid var(--bark);
+  }
+  @media(max-width:500px){ .meta-grid { grid-template-columns: 1fr 1fr; } }
+  .meta-item .meta-label {
+    font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: #555; margin-bottom: 5px;
+  }
+  .meta-item .meta-value { font-size: 13px; color: #111; font-weight: 500; }
+  .meta-item .meta-value.hl { color: var(--sun); }
+
+  /* ── Fertilizer Plan Card ── */
+  .fert-card {
+    background: var(--earth); border: 1px solid var(--bark);
+    border-radius: 12px; padding: 24px; margin-bottom: 10px;
+  }
+  .fert-title {
+    font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: #444; margin-bottom: 18px; font-weight: 600;
+  }
+  .fert-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+  @media(max-width:540px){ .fert-grid { grid-template-columns: 1fr; } }
+  .fert-item {
+    background: #fff; border: 1px solid var(--bark); border-radius: 8px;
+    padding: 14px 16px;
+  }
+  .fert-nutrient {
+    font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: #888; margin-bottom: 6px;
+  }
+  .fert-name { font-size: 13px; font-weight: 600; color: #111; margin-bottom: 4px; }
+  .fert-amount { font-size: 18px; font-weight: 700; color: var(--leaf); }
+  .fert-amount span { font-size: 11px; font-weight: 400; color: #888; }
+  .fert-deficit { font-size: 10px; color: #888; margin-top: 4px; }
+  .fert-cost-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-top: 14px; margin-top: 14px; border-top: 1px solid var(--bark);
+  }
+  .fert-cost-label { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: #666; }
+  .fert-cost-value { font-size: 20px; font-weight: 700; color: var(--sun); }
+  .no-fert {
+    font-size: 12px; color: var(--leaf); padding: 12px 16px;
+    background: rgba(74,170,68,0.08); border-radius: 6px;
+    border: 1px solid rgba(74,170,68,0.2);
+  }
+
+  /* ── Comparison Table ── */
+  .compare-table {
+    width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 8px;
+  }
+  .compare-table th {
+    font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: #555; padding: 10px 14px; border-bottom: 1px solid var(--bark);
+    text-align: left; font-weight: 600;
+  }
+  .compare-table td {
+    padding: 12px 14px; border-bottom: 1px solid rgba(100,160,80,0.2);
+    vertical-align: middle;
+  }
+  .compare-table tr.best-row td { background: rgba(74,170,68,0.06); }
+  .compare-table tr:hover td { background: rgba(200,230,180,0.3); }
+  .rank-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%;
+    font-size: 10px; font-weight: 700;
+  }
+  .rank-1 { background: var(--sprout); color: #fff; }
+  .rank-2 { background: var(--sky); color: #fff; }
+  .rank-3 { background: var(--sun); color: #fff; }
+  .score-bar-wrap { display: flex; align-items: center; gap: 8px; }
+  .score-bar-track {
+    flex:1; height: 5px; border-radius: 5px;
+    background: var(--bark); overflow: hidden;
+  }
+  .score-bar-fill {
+    height: 100%; border-radius: 5px;
+    background: linear-gradient(90deg, var(--leaf), var(--sprout));
+    transition: width 0.8s ease;
+  }
+  .score-val { font-size: 11px; min-width: 38px; text-align: right; font-weight: 600; color: var(--leaf); }
+
+  /* ════════════════════════════════════
+     METRICS PANEL
+  ════════════════════════════════════ */
+
+  .metrics-load-btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--earth); border: 1px solid var(--bark);
+    border-radius: 7px; padding: 13px 24px; cursor: pointer;
+    font-family: 'DM Mono', monospace; font-size: 11px;
+    letter-spacing: 0.15em; text-transform: uppercase; color: var(--straw);
+    transition: border-color 0.2s, color 0.2s; margin-bottom: 36px;
+  }
+  .metrics-load-btn:hover { border-color: var(--sprout); color: var(--sprout); }
+  .metrics-load-btn .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--sprout); }
+
+  /* Overview cards */
+  .overview-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 36px;
+  }
+  @media(max-width: 600px) { .overview-grid { grid-template-columns: 1fr 1fr; } }
+
+  .metric-card {
+    background: var(--earth); border: 1px solid var(--bark); border-radius: 10px;
+    padding: 22px 20px; position: relative; overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .metric-card:hover { border-color: rgba(74,170,68,0.5); }
+  .metric-card::after {
+    content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+    background: var(--accent, var(--sprout));
+  }
+  .mc-label {
+    font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: #000000; opacity: 1; margin-bottom: 10px;
+  }
+  .mc-value {
+    font-family: 'Playfair Display', serif; font-size: 2.2rem;
+    font-weight: 700; color: #111111; line-height: 1;
+  }
+  .mc-value span { font-size: 1rem; opacity: 0.6; font-family: 'DM Mono', monospace; }
+  .mc-bar {
+    margin-top: 12px; height: 3px; border-radius: 3px;
+    background: var(--bark); overflow: hidden;
+  }
+  .mc-bar-fill {
+    height: 100%; border-radius: 3px; background: var(--accent, var(--sprout));
+    transition: width 0.8s cubic-bezier(0.22,1,0.36,1);
+  }
+
+  /* Section headers */
+  .section-head {
+    font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: #000000; opacity: 1; margin-bottom: 18px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .section-head::after {
+    content: ''; flex: 1; height: 1px; background: var(--bark);
+  }
+
+  /* Per-class table */
+  .per-class-table {
+    width: 100%; border-collapse: collapse; margin-bottom: 40px;
+    font-size: 12px;
+  }
+  .per-class-table th {
+    text-align: left; font-size: 9px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: #000000; opacity: 1;
+    padding: 10px 14px; border-bottom: 1px solid var(--bark); font-weight: 600;
+  }
+  .per-class-table td {
+    padding: 10px 14px; border-bottom: 1px solid rgba(100,160,80,0.35);
+    color: #111111; vertical-align: middle;
+  }
+  .per-class-table tr:hover td { background: rgba(200,230,180,0.4); }
+  .per-class-table td:first-child { text-transform: capitalize; }
+  .per-class-table td:not(:first-child):not(:last-child) { color: #333333; }
+
+  .mini-bar {
+    display: flex; align-items: center; gap: 8px;
+  }
+  .mini-bar-track {
+    flex: 1; height: 4px; border-radius: 4px;
+    background: var(--bark); overflow: hidden;
+  }
+  .mini-bar-fill {
+    height: 100%; border-radius: 4px;
+    background: linear-gradient(90deg, var(--leaf), var(--sprout));
+    transition: width 0.6s ease;
+  }
+  .mini-bar-val { font-size: 11px; min-width: 40px; text-align: right; }
+
+  /* Confusion matrix */
+  .cm-wrapper {
+    overflow-x: auto; margin-bottom: 40px;
+  }
+  .cm-note {
+    font-size: 10px; color: #000000; opacity: 1;
+    margin-bottom: 12px; letter-spacing: 0.05em;
+  }
+  .cm-table {
+    border-collapse: collapse; font-size: 10px;
+    min-width: max-content;
+  }
+  .cm-table th, .cm-table td {
+    width: 32px; height: 32px; text-align: center;
+    vertical-align: middle;
+  }
+  .cm-table th {
+    font-weight: 500; color: #000000; opacity: 1; font-size: 9px;
+    padding: 2px 4px;
+  }
+  .cm-table th.row-header {
+    width: 60px; text-align: right; padding-right: 10px;
+    font-size: 9px; text-transform: capitalize; letter-spacing: 0;
+    white-space: nowrap; opacity: 1; color: #000000;
+  }
+  .cm-cell {
+    border-radius: 3px; font-size: 10px; cursor: default;
+    transition: opacity 0.15s;
+    position: relative;
+  }
+  .cm-cell:hover::after {
+    content: attr(data-tip);
+    position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%);
+    background: var(--soil); border: 1px solid var(--bark);
+    padding: 4px 8px; border-radius: 4px; font-size: 9px;
+    white-space: nowrap; z-index: 99; pointer-events: none;
+    color: #111111; letter-spacing: 0.05em;
+  }
+
+  /* Loading skeleton */
+  .skeleton {
+    background: linear-gradient(90deg, var(--earth) 25%, var(--bark) 50%, var(--earth) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 6px;
+  }
+  @keyframes shimmer { to { background-position: -200% 0; } }
+
+  #metrics-content { display: none; }
+  #metrics-loading { display: none; }
+  #metrics-prompt { display: block; }
+
+  /* ── Soil type select ── */
+  .field select {
+    width: 100%; background: var(--earth); border: 1px solid var(--bark);
+    border-radius: 6px; padding: 13px 15px; color: #111111;
+    font-family: 'DM Mono', monospace; font-size: 13px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none; cursor: pointer; appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 14px center;
+  }
+  .field select:focus {
+    border-color: var(--sprout); box-shadow: 0 0 0 3px rgba(74,170,68,0.12);
+  }
+
+  /* ── Application Schedule Timeline ── */
+  .schedule-card {
+    background: var(--earth); border: 1px solid var(--bark);
+    border-radius: 12px; padding: 24px; margin-bottom: 10px;
+  }
+  .schedule-title {
+    font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: #444; margin-bottom: 20px; font-weight: 600;
+  }
+  .timeline {
+    position: relative; padding-left: 28px;
+  }
+  .timeline::before {
+    content: ''; position: absolute; left: 8px; top: 0; bottom: 0;
+    width: 2px; background: var(--bark); border-radius: 2px;
+  }
+  .timeline-item {
+    position: relative; margin-bottom: 24px;
+  }
+  .timeline-item:last-child { margin-bottom: 0; }
+  .timeline-dot {
+    position: absolute; left: -24px; top: 4px;
+    width: 14px; height: 14px; border-radius: 50%;
+    background: var(--sprout); border: 2px solid #fff;
+    box-shadow: 0 0 0 2px var(--sprout);
+  }
+  .timeline-header {
+    display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px;
+    flex-wrap: wrap;
+  }
+  .timeline-stage {
+    font-size: 13px; font-weight: 600; color: #111;
+  }
+  .timeline-month {
+    font-size: 10px; color: var(--sprout); letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .timeline-days {
+    font-size: 10px; color: #888;
+  }
+  .timeline-notes {
+    font-size: 11px; color: #666; line-height: 1.6;
+    margin-bottom: 8px; font-style: italic;
+  }
+  .timeline-ferts {
+    display: flex; gap: 8px; flex-wrap: wrap;
+  }
+  .fert-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: #fff; border: 1px solid var(--bark);
+    border-radius: 20px; padding: 4px 10px; font-size: 11px;
+  }
+  .fert-chip-dot { width: 7px; height: 7px; border-radius: 50%; }
+  .fert-chip-text { color: #333; font-weight: 500; }
+  .no-schedule {
+    font-size: 12px; color: #888; font-style: italic; padding: 8px 0;
+  }
+  .npk-viz-card {
+    background: var(--earth); border: 1px solid var(--bark);
+    border-radius: 12px; padding: 24px; margin-bottom: 10px;
+  }
+  .npk-viz-title {
+    font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: #444; margin-bottom: 18px; font-weight: 600;
+  }
+  .npk-bar-row {
+    display: grid; grid-template-columns: 80px 1fr 60px;
+    align-items: center; gap: 12px; margin-bottom: 14px;
+  }
+  .npk-bar-label { font-size: 11px; color: #444; font-weight: 500; }
+  .npk-bar-outer {
+    height: 10px; border-radius: 10px;
+    background: var(--bark); overflow: hidden; position: relative;
+  }
+  .npk-bar-actual {
+    height: 100%; border-radius: 10px;
+    transition: width 0.8s cubic-bezier(0.22,1,0.36,1);
+  }
+  .npk-bar-ideal-marker {
+    position: absolute; top: 0; bottom: 0; width: 2px;
+    background: #333; opacity: 0.5;
+  }
+  .npk-bar-val { font-size: 11px; color: #333; text-align: right; }
+  .npk-legend {
+    display: flex; gap: 18px; margin-top: 14px; font-size: 10px; color: #666;
+  }
+  .npk-legend span { display: flex; align-items: center; gap: 6px; }
+  .npk-legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+  .soil-type-tag {
+    display: inline-block; background: rgba(74,170,68,0.1);
+    border: 1px solid rgba(74,170,68,0.3); border-radius: 4px;
+    padding: 2px 10px; font-size: 10px; color: var(--leaf);
+    letter-spacing: 0.1em; text-transform: uppercase; margin-left: 8px;
+  }
+
+  /* ── Application Schedule Timeline ── */
+  .schedule-timeline { position: relative; padding-left: 28px; }
+  .schedule-timeline::before {
+    content: ''; position: absolute; left: 9px; top: 8px; bottom: 8px;
+    width: 2px; background: var(--bark); border-radius: 2px;
+  }
+  .schedule-stage {
+    position: relative; margin-bottom: 24px;
+  }
+  .schedule-stage::before {
+    content: ''; position: absolute; left: -23px; top: 10px;
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--sprout); border: 2px solid #fff;
+    box-shadow: 0 0 0 2px var(--sprout);
+  }
+  .stage-header {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 8px; flex-wrap: wrap;
+  }
+  .stage-name {
+    font-size: 12px; font-weight: 600; color: #111;
+  }
+  .stage-month {
+    font-size: 10px; background: var(--earth); border: 1px solid var(--bark);
+    border-radius: 4px; padding: 2px 8px; color: #555;
+  }
+  .stage-days {
+    font-size: 10px; color: #888; letter-spacing: 0.05em;
+  }
+  .stage-notes {
+    font-size: 11px; color: #666; margin-bottom: 10px;
+    line-height: 1.6; letter-spacing: 0.02em;
+  }
+  .stage-apps {
+    display: flex; gap: 10px; flex-wrap: wrap;
+  }
+  .app-pill {
+    display: flex; align-items: center; gap: 6px;
+    background: #fff; border: 1px solid var(--bark);
+    border-radius: 20px; padding: 5px 12px; font-size: 11px;
+  }
+  .app-pill-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+  }
+  .app-pill-name { color: #444; }
+  .app-pill-amount { font-weight: 600; color: var(--leaf); }
+
+  /* ── Application Schedule ── */
+  .schedule-timeline { position: relative; padding-left: 24px; }
+  .schedule-timeline::before {
+    content: ''; position: absolute; left: 7px; top: 8px; bottom: 8px;
+    width: 2px; background: var(--bark); border-radius: 2px;
+  }
+  .schedule-stage {
+    position: relative; margin-bottom: 20px;
+    background: #fff; border: 1px solid var(--bark);
+    border-radius: 10px; padding: 16px 18px;
+  }
+  .schedule-stage::before {
+    content: ''; position: absolute; left: -20px; top: 18px;
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--sprout); border: 2px solid #fff;
+    box-shadow: 0 0 0 2px var(--sprout);
+  }
+  .stage-header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 10px; flex-wrap: wrap; gap: 6px;
+  }
+  .stage-name { font-size: 13px; font-weight: 600; color: #111; }
+  .stage-timing {
+    font-size: 10px; color: #fff; background: var(--leaf);
+    padding: 3px 10px; border-radius: 20px; letter-spacing: 0.08em;
+  }
+  .stage-month {
+    font-size: 10px; color: var(--sky); letter-spacing: 0.08em;
+    margin-bottom: 8px;
+  }
+  .stage-notes {
+    font-size: 11px; color: #666; font-style: italic;
+    margin-bottom: 10px; line-height: 1.6;
+  }
+  .stage-fert-list { display: flex; flex-wrap: wrap; gap: 8px; }
+  .stage-fert-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(74,170,68,0.08); border: 1px solid rgba(74,170,68,0.2);
+    border-radius: 20px; padding: 4px 12px; font-size: 11px;
+  }
+  .stage-fert-pill .pill-name { font-weight: 600; color: var(--leaf); }
+  .stage-fert-pill .pill-amt  { color: #555; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <header>
+    <div class="header-label">Precision Agriculture</div>
+    <h1>Crop<span>Sense.</span></h1>
+    <div class="divider"></div>
+    <p class="header-sub">Enter your soil and climate parameters to receive a personalised crop recommendation with planting calendar.</p>
+  </header>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('predict')">Predict</button>
+  </div>
+
+  <!-- ── TAB: Predict ── -->
+  <div class="tab-panel active" id="tab-predict">
+    <form id="cropForm" novalidate>
+      <div class="form-grid">
+        <div class="field">
+          <label>Nitrogen <span class="field-unit">mg/kg</span></label>
+          <input type="number" id="N" placeholder="0–140" min="0" max="200" step="any" required>
+        </div>
+        <div class="field">
+          <label>Phosphorus <span class="field-unit">mg/kg</span></label>
+          <input type="number" id="P" placeholder="5–145" min="0" max="200" step="any" required>
+        </div>
+        <div class="field">
+          <label>Potassium <span class="field-unit">mg/kg</span></label>
+          <input type="number" id="K" placeholder="5–205" min="0" max="250" step="any" required>
+        </div>
+        <div class="field">
+          <label>Temperature <span class="field-unit">°C</span></label>
+          <input type="number" id="temperature" placeholder="8–43" min="-10" max="60" step="any" required>
+        </div>
+        <div class="field">
+          <label>Humidity <span class="field-unit">%</span></label>
+          <input type="number" id="humidity" placeholder="14–99" min="0" max="100" step="any" required>
+        </div>
+        <div class="field">
+          <label>Soil pH</label>
+          <input type="number" id="ph" placeholder="3.5–9.5" min="0" max="14" step="any" required>
+        </div>
+        <div class="field span-2">
+          <label>Rainfall <span class="field-unit">mm</span></label>
+          <input type="number" id="rainfall" placeholder="20–298" min="0" max="500" step="any" required>
+        </div>
+        <div class="field">
+          <label>Soil Type</label>
+          <select id="soil_type">
+            <option value="Loamy">Loamy (Balanced)</option>
+            <option value="Sandy">Sandy (Fast draining)</option>
+            <option value="Clay">Clay (Water retaining)</option>
+            <option value="Sandy Loam">Sandy Loam</option>
+            <option value="Clay Loam">Clay Loam</option>
+            <option value="Silty Loam">Silty Loam</option>
+          </select>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit" id="submitBtn">
+        <span class="btn-text">Analyse & Recommend</span>
+        <div class="spinner"></div>
+      </button>
+    </form>
+
+    <div class="error-card" id="errorCard"></div>
+
+    <!-- ── Phase 4 Result ── -->
+    <div id="result-container">
+
+      <!-- Best crop card -->
+      <div class="section-label">Best Recommendation</div>
+      <div class="best-card">
+        <div class="best-crop-row">
+          <div class="best-emoji" id="bestEmoji">🌾</div>
+          <div>
+            <div style="font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--sprout);margin-bottom:6px">
+              Recommended Crop <span class="best-badge">RANK #1</span>
+            </div>
+            <div class="best-crop-name" id="bestCropName">—</div>
+          </div>
+        </div>
+        <div class="best-reason" id="bestReason"></div>
+        <div class="meta-grid" id="bestMeta"></div>
+      </div>
+
+      <!-- Fertilizer plan -->
+      <div class="section-label">Fertilizer Plan</div>
+      <div class="fert-card">
+        <div class="fert-title">Recommended Fertilizers — <span id="fertCropName"></span></div>
+        <div class="fert-grid" id="fertGrid"></div>
+        <div class="fert-cost-row">
+          <span class="fert-cost-label">Estimated Total Cost</span>
+          <span class="fert-cost-value" id="fertTotal">₹0</span>
+        </div>
+      </div>
+
+      <!-- Application Schedule -->
+      <div class="section-label">Application Schedule</div>
+      <div class="schedule-card">
+        <div class="schedule-title">
+          Stage-by-Stage Fertilizer Plan — <span id="scheduleCropName"></span>
+        </div>
+        <div class="timeline" id="scheduleTimeline"></div>
+      </div>
+
+      <!-- NPK Visualization -->
+      <div class="section-label">NPK Soil Analysis</div>
+      <div class="npk-viz-card">
+        <div class="npk-viz-title">
+          Your Soil vs Ideal Requirements
+          <span class="soil-type-tag" id="soilTypeTag">Loamy</span>
+        </div>
+        <div id="npkVizContent"></div>
+        <div class="npk-legend">
+          <span><span class="npk-legend-dot" style="background:var(--sprout)"></span>Your Soil</span>
+          <span><span class="npk-legend-dot" style="background:#ddd;border:1px solid #999"></span>Ideal Level (marker)</span>
+        </div>
+      </div>
+
+      <!-- Comparison table -->
+      <div class="section-label">All 3 Candidates — Comparison</div>
+      <div style="overflow-x:auto;margin-bottom:40px">
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Crop</th>
+              <th>Soil Match</th>
+              <th>Fert. Cost</th>
+            </tr>
+          </thead>
+          <tbody id="compareBody"></tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+  /* ── Tab switching ── */
+  function switchTab(name) {
+    document.querySelectorAll('.tab-btn').forEach((b,i) => {
+      b.classList.toggle('active', ['predict','metrics'][i] === name);
+    });
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+  }
+
+  /* ── Crop emoji map ── */
+  const cropEmojis = {
+    rice:'🌾', maize:'🌽', wheat:'🌾', cotton:'🏵️', jute:'🌿', coffee:'☕',
+    apple:'🍎', banana:'🍌', mango:'🥭', grapes:'🍇', watermelon:'🍉',
+    muskmelon:'🍈', papaya:'🍑', coconut:'🥥', pomegranate:'🍎', lentil:'🫘',
+    blackgram:'🫘', mungbean:'🫘', mothbeans:'🫘', pigeonpeas:'🫘',
+    kidneybeans:'🫘', chickpea:'🫘', orange:'🍊',
+  };
+
+  /* ── Form submit ── */
+  const form      = document.getElementById('cropForm');
+  const submitBtn = document.getElementById('submitBtn');
+  const errorCard = document.getElementById('errorCard');
+
+  // Hide result container initially
+  document.getElementById('result-container').style.display = 'none';
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    document.getElementById('result-container').style.display = 'none';
+    errorCard.classList.remove('visible');
+
+    const fields = ['N','P','K','temperature','humidity','ph','rainfall'];
+    const payload = {};
+    let valid = true;
+    for (const f of fields) {
+      const v = parseFloat(document.getElementById(f).value);
+      if (isNaN(v)) { valid = false; break; }
+      payload[f] = v;
+    }
+    if (!valid) { showError('Please fill in all 7 fields with valid numbers.'); return; }
+
+    // Add soil type
+    payload.soil_type = document.getElementById('soil_type').value;
+
+    submitBtn.disabled = true;
+    submitBtn.classList.add('loading');
+
+    try {
+      const res  = await fetch('http://localhost:5000/recommend', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || 'Server error.');
+      displayResult(data);
+    } catch (err) {
+      showError(`Cannot reach Flask server.<br><small style="opacity:0.55;margin-top:4px;display:block">${err.message}</small>`);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.classList.remove('loading');
+    }
+  });
+
+  /* ── Nutrient labels ── */
+  const NUTRIENTS = {
+    N: { label: 'Nitrogen',   fert: 'Urea' },
+    P: { label: 'Phosphorus', fert: 'DAP'  },
+    K: { label: 'Potassium',  fert: 'MOP'  },
+  };
+
+  function displayResult(data) {
+    const best      = data.ranked[0];
+    const cal       = data.calendar || {};
+    const soilType  = document.getElementById('soil_type').value;
+    const soilN     = parseFloat(document.getElementById('N').value);
+    const soilP     = parseFloat(document.getElementById('P').value);
+    const soilK     = parseFloat(document.getElementById('K').value);
+
+    // ── Best crop card ──
+    const emoji = cropEmojis[best.crop.toLowerCase()] || '🌱';
+    document.getElementById('bestEmoji').textContent    = emoji;
+    document.getElementById('bestCropName').textContent = best.crop;
+    document.getElementById('bestReason').textContent   = best.reason || '';
+
+    const metaEl = document.getElementById('bestMeta');
+    metaEl.innerHTML = '';
+    const addM = (label, value, hl = false) => metaEl.insertAdjacentHTML('beforeend',
+      `<div class="meta-item">
+         <div class="meta-label">${label}</div>
+         <div class="meta-value${hl?' hl':''}">${value}</div>
+       </div>`);
+
+    addM('Soil Match', `${best.confidence}%`);
+    addM('Soil Type', soilType);
+    if (cal.growth_duration_months) {
+      addM('Growth Duration', `${cal.growth_duration_months} months`);
+      addM('Sow By', cal.recommended_sow_month || '—');
+      addM('Harvest', cal.harvest_month || '—', true);
+    }
+
+    // ── Fertilizer plan ──
+    document.getElementById('fertCropName').textContent = best.crop;
+    const fertGrid = document.getElementById('fertGrid');
+    fertGrid.innerHTML = '';
+    const plan     = best.fert_plan || {};
+    const hasFert  = Object.values(plan).some(d => d.amount_kg > 0);
+
+    if (!hasFert) {
+      fertGrid.insertAdjacentHTML('beforeend',
+        `<div class="no-fert" style="grid-column:1/-1">
+           ✅ No fertilizer needed — soil nutrients already meet requirements for <strong>${best.crop}</strong>.
+         </div>`);
+    } else {
+      ['N','P','K'].forEach(n => {
+        const d      = plan[n] || {};
+        const amount = d.amount_kg || 0;
+        const deficit = d.deficit_kg || 0;
+        fertGrid.insertAdjacentHTML('beforeend', `
+          <div class="fert-item">
+            <div class="fert-nutrient">${NUTRIENTS[n].label} (${n})</div>
+            <div class="fert-name">${d.fertilizer || NUTRIENTS[n].fert}</div>
+            <div class="fert-amount">${amount > 0 ? amount : '0'}<span> kg/ha</span></div>
+            <div class="fert-deficit">${deficit > 0 ? `Deficit: ${deficit} kg/ha` : 'Sufficient in soil'}</div>
+          </div>`);
+      });
+    }
+    document.getElementById('fertTotal').textContent =
+      best.total_cost > 0 ? `₹${best.total_cost}` : '₹0 — No amendment needed';
+
+    // ── NPK Visualization ──
+    document.getElementById('soilTypeTag').textContent = soilType;
+    const ideal    = best.ideal_npk || {};
+    const npkViz   = document.getElementById('npkVizContent');
+    npkViz.innerHTML = '';
+
+    const npkData = [
+      { key:'N', label:'Nitrogen (N)',   actual: soilN, ideal: ideal.N || 0, color:'#3a9a34' },
+      { key:'P', label:'Phosphorus (P)', actual: soilP, ideal: ideal.P || 0, color:'#3a8aaa' },
+      { key:'K', label:'Potassium (K)',  actual: soilK, ideal: ideal.K || 0, color:'#b87c10' },
+    ];
+
+    npkData.forEach(({ label, actual, ideal: idl, color }) => {
+      const maxVal     = Math.max(actual, idl, 10);
+      const actualPct  = Math.min((actual / maxVal) * 100, 100).toFixed(1);
+      const idealPct   = Math.min((idl    / maxVal) * 100, 100).toFixed(1);
+      const status     = actual >= idl
+        ? `<span style="color:var(--sprout);font-size:10px">✓ Sufficient</span>`
+        : `<span style="color:var(--red);font-size:10px">↑ Needs ${(idl - actual).toFixed(0)} more</span>`;
+      npkViz.insertAdjacentHTML('beforeend', `
+        <div class="npk-bar-row">
+          <div class="npk-bar-label">${label}</div>
+          <div class="npk-bar-outer">
+            <div class="npk-bar-actual" style="width:${actualPct}%;background:${color}"></div>
+            <div class="npk-bar-ideal-marker" style="left:${idealPct}%"></div>
+          </div>
+          <div class="npk-bar-val">${actual} / ${idl}${status}</div>
+        </div>`);
+    });
+
+    // ── Application Schedule ──
+    document.getElementById('scheduleCropName').textContent = best.crop;
+    const timeline = document.getElementById('scheduleTimeline');
+    timeline.innerHTML = '';
+    const schedule  = data.schedule || [];
+    const fertColors = { N: '#3a9a34', P: '#3a8aaa', K: '#b87c10' };
+    if (schedule.length === 0) {
+      timeline.insertAdjacentHTML('beforeend',
+        `<p style="font-size:12px;color:#888;font-style:italic">
+           No stage data available for this crop.
+         </p>`);
+    } else {
+      schedule.forEach(s => {
+        const fertHTML = s.application.length > 0
+          ? s.application.map(a =>
+              `<div class="stage-fert-pill">
+                 <span class="pill-name">${a.fertilizer}</span>
+                 <span class="pill-amt">${a.amount_kg} kg/ha</span>
+               </div>`).join('')
+          : `<div class="stage-fert-pill">
+               <span class="pill-name" style="color:#888">No fertilizer at this stage</span>
+             </div>`;
+
+        timeline.insertAdjacentHTML('beforeend', `
+          <div class="schedule-stage">
+            <div class="stage-header">
+              <div class="stage-name">${s.stage}</div>
+              <div class="stage-timing">Day ${s.days_after_sowing}</div>
+            </div>
+            <div class="stage-month">📅 Apply around: ${s.application_month}</div>
+            <div class="stage-notes">${s.notes}</div>
+            <div class="stage-fert-list">${fertHTML}</div>
+          </div>`);
+      });
+    }
+
+    // ── Comparison table (no score/reason) ──
+    const tbody = document.getElementById('compareBody');
+    tbody.innerHTML = '';
+    data.ranked.forEach(r => {
+      const e      = cropEmojis[r.crop.toLowerCase()] || '🌱';
+      const isBest = r.rank === 1;
+      tbody.insertAdjacentHTML('beforeend', `
+        <tr class="${isBest ? 'best-row' : ''}">
+          <td><span class="rank-badge rank-${r.rank}">${r.rank}</span></td>
+          <td style="text-transform:capitalize;font-weight:${isBest?'600':'400'}">
+            ${e} ${r.crop}
+          </td>
+          <td>${r.confidence}%</td>
+          <td>${r.total_cost > 0 ? '₹'+r.total_cost : '₹0'}</td>
+        </tr>`);
+    });
+
+    // ── Show result ──
+    const rc = document.getElementById('result-container');
+    rc.style.opacity    = '0';
+    rc.style.transform  = 'translateY(16px)';
+    rc.style.transition = 'opacity 0.45s ease, transform 0.45s ease';
+    rc.style.display    = 'block';
+    requestAnimationFrame(() => {
+      rc.style.opacity   = '1';
+      rc.style.transform = 'none';
+    });
+    rc.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function showError(msg) {
+    errorCard.innerHTML = `⚠ ${msg}`;
+    errorCard.classList.add('visible');
+    errorCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+
+</script>
+</body>
+</html>
