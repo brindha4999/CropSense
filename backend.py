@@ -19,33 +19,33 @@ CORS(app)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# ── Load crop recommendation dataset ────────────────────────────────────
+#Load crop recommendation dataset 
 crop = pd.read_csv(os.path.join(BASE_DIR, 'Crop_recommendation.xls'))
 
-# ── Encode labels ───────────────────────────────────────────────────────
+#Encode labels 
 le = LabelEncoder()
 crop['label_encoded'] = le.fit_transform(crop['label'])
 
 X = crop[['N', 'P', 'K', 'temperature', 'humidity', 'ph', 'rainfall']]
 y = crop['label_encoded']
 
-# ── Train / test split ──────────────────────────────────────────────────
+#Train / test split 
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42
 )
 
-# ── Scale features ──────────────────────────────────────────────────────
+#Scale features
 sc = StandardScaler()
 X_train = sc.fit_transform(X_train)
 X_test  = sc.transform(X_test)
 
-# ── Train Gaussian Naive Bayes ──────────────────────────────────────────
+#Train Gaussian Naive Bayes
 model = GaussianNB()
 model.fit(X_train, y_train)
 
 y_pred = model.predict(X_test)
 
-# ── Compute all metrics ─────────────────────────────────────────────────
+#Compute all metrics 
 acc   = accuracy_score(y_test, y_pred)
 err   = 1 - acc
 f1    = f1_score(y_test, y_pred, average='weighted')
@@ -69,12 +69,9 @@ print(f"   F1 Score   : {f1:.4f}")
 print(f"   MCC        : {mcc:.4f}")
 print(f"   Kappa      : {kappa:.4f}")
 print(f"   G-Mean     : {gmean:.4f}")
+#PHASE 1 — Load Fertilizer Data Files 
 
-# ════════════════════════════════════════════════════════════════════════
-# ── PHASE 1 — Load Fertilizer Data Files ────────────────────────────────
-# ════════════════════════════════════════════════════════════════════════
-
-# ── Load crop NPK requirements ───────────────────────────────────────────
+#Load crop NPK requirements
 crop_requirements = {}
 REQ_PATH = os.path.join(BASE_DIR, 'crop_requirements.csv')
 if os.path.exists(REQ_PATH):
@@ -90,7 +87,7 @@ if os.path.exists(REQ_PATH):
 else:
     print("⚠️  crop_requirements.csv not found.")
 
-# ── Load fertilizer mapping ───────────────────────────────────────────────
+#Load fertilizer mapping
 fertilizer_map = {}
 FERT_PATH = os.path.join(BASE_DIR, 'fertilizer_data.csv')
 if os.path.exists(FERT_PATH):
@@ -105,7 +102,7 @@ if os.path.exists(FERT_PATH):
 else:
     print("⚠️  fertilizer_data.csv not found.")
 
-# ── Load crop growth stages ───────────────────────────────────────────────
+#Load crop growth stages
 crop_stages = {}
 STAGES_PATH = os.path.join(BASE_DIR, 'crop_stages.csv')
 if os.path.exists(STAGES_PATH):
@@ -117,7 +114,7 @@ if os.path.exists(STAGES_PATH):
 else:
     print("⚠️  crop_stages.csv not found.")
 
-# ── Absorption efficiency by soil type ───────────────────────────────────
+#Absorption efficiency by soil type 
 ABSORPTION = {
     'Sandy':     {'N': 0.55, 'P': 0.25, 'K': 0.50},
     'Loamy':     {'N': 0.70, 'P': 0.35, 'K': 0.65},
@@ -127,9 +124,7 @@ ABSORPTION = {
     'Silty Loam':{'N': 0.68, 'P': 0.33, 'K': 0.62},
 }
 
-# ════════════════════════════════════════════════════════════════════════
-# ── PHASE 2 — Fertilizer Engine Functions ───────────────────────────────
-# ════════════════════════════════════════════════════════════════════════
+#PHASE 2 — Fertilizer Engine Functions
 
 def calculate_deficiency(soil, ideal):
     """
@@ -237,7 +232,7 @@ def build_fertilizer_plan(crop_name, soil, soil_type='Loamy'):
     }
 
 
-# ── Load crop stages ─────────────────────────────────────────────────────
+#Load crop stages
 crop_stages = {}
 STAGES_PATH = os.path.join(BASE_DIR, 'crop_stages.csv')
 if os.path.exists(STAGES_PATH):
@@ -349,7 +344,7 @@ for k, v in FALLBACK_CALENDAR.items():
         crop_calendar[k] = v
 
 
-# ── Helper: pick best sowing month ──────────────────────────────────────
+#Helper: pick best sowing month
 def get_sowing_month(current_month, suitable_months):
     for offset in range(12):
         candidate = (current_month - 1 + offset) % 12 + 1
@@ -369,13 +364,10 @@ def soften_proba(proba, temperature=3.0):
     log_p -= np.max(log_p)  # numerical stability
     softened = np.exp(log_p)
     return softened / softened.sum()
+    
+#ENDPOINTS
 
-
-# ════════════════════════════════════════════════════════════════════════
-# ── ENDPOINTS ───────────────────────────────────────────────────────────
-# ════════════════════════════════════════════════════════════════════════
-
-# ── /predict endpoint ────────────────────────────────────────────────────
+#/predict endpoint
 @app.route('/predict', methods=['POST'])
 def predict():
     data = request.get_json()
@@ -440,7 +432,7 @@ def predict():
         return jsonify({'error': str(e)}), 500
 
 
-# ── /fertilizer endpoint ─────────────────────────────────────────────────
+#/fertilizer endpoint
 @app.route('/fertilizer', methods=['POST'])
 def fertilizer():
     """
@@ -486,7 +478,7 @@ def fertilizer():
         return jsonify({'error': str(e)}), 500
 
 
-# ── /fertilizer/top3 endpoint ────────────────────────────────────────────
+#/fertilizer/top3 endpoint
 @app.route('/fertilizer/top3', methods=['POST'])
 def fertilizer_top3():
     """
@@ -526,10 +518,7 @@ def fertilizer_top3():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
-# ════════════════════════════════════════════════════════════════════════
-# ── PHASE 3 — Multi-Crop Scoring & Ranking ──────────────────────────────
-# ════════════════════════════════════════════════════════════════════════
+#PHASE 3 — Multi-Crop Scoring & Ranking
 
 def normalize(values):
     """Min-max normalize a list of values to [0, 1]."""
@@ -624,7 +613,7 @@ def rank_crops(top3_plans, confidences):
     return top3_plans
 
 
-# ── /recommend endpoint ──────────────────────────────────────────────────
+#/recommend endpoint 
 @app.route('/recommend', methods=['POST'])
 def recommend():
     """
@@ -726,7 +715,7 @@ def recommend():
         return jsonify({'error': str(e)}), 500
 
 
-# ── /metrics endpoint ────────────────────────────────────────────────────
+#/metrics endpoint
 @app.route('/metrics', methods=['GET'])
 def get_metrics():
     try:
