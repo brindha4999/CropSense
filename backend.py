@@ -14,6 +14,7 @@ from sklearn.metrics import (
     recall_score
 )
 
+
 app = Flask(__name__)
 CORS(app)
 
