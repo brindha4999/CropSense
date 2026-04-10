@@ -94,7 +94,6 @@ python backend.py
 
 This starts the Flask server.
 
----
 
 ### Step 2 – Open Frontend
 
@@ -106,7 +105,6 @@ frontend.html
 
 in your web browser.
 
----
 
 ### Step 3 – Sensor Data Collection (Hardware)
 
