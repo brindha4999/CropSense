@@ -1,4 +1,4 @@
-## 🌾 CropSense – AI & IoT Based Smart Crop Recommendation System
+## 🌾 CropSense – AI & IoT Based Smart Crop & Fertilizer Recommendation System
 
 ## 📌 Project Description
 
