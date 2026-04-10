@@ -1,26 +1,27 @@
-# 🌾 CropSense – Smart Crop Recommendation System
+🌾 CropSense – AI & IoT Based Smart Crop Recommendation System
 
-## 📌 Project Description
+📌 Project Description
 
-CropSense is a machine learning–based agriculture decision support system that helps farmers choose the most suitable crop based on soil nutrients and environmental conditions. The system analyzes parameters such as nitrogen, phosphorus, potassium, pH, temperature, humidity, and rainfall to recommend the best crop.
+CropSense is an **AI and IoT-based agriculture decision support system** that helps farmers choose the most suitable crop based on soil and environmental conditions.
 
-The model is deployed through a Python backend and connected to a simple web-based frontend so users can easily input values and receive recommendations.
+The system uses **IoT sensors to collect real-time field data**, which is then processed by a **machine learning model** to recommend the most suitable crop. The system also provides information such as sowing time, growth duration, fertilizer recommendations, and estimated fertilizer cost.
 
----
+The project integrates **hardware sensors, machine learning models, and a web interface** to provide a complete smart farming solution.
 
-## 🚜 Features
+🚜 Features
 
-* AI-based crop recommendation
-* Soil nutrient analysis (N, P, K, pH)
-* Climate factor analysis (temperature, humidity, rainfall)
-* Fertilizer recommendation
-* Estimated fertilizer cost
-* Crop growth duration estimation
-* Harvest window prediction
+* 🌱 AI-based crop recommendation
+* 📡 Real-time data collection using IoT sensors
+* 🌍 Soil and environmental parameter analysis
+* 💊 Fertilizer recommendation
+* 💰 Estimated fertilizer cost calculation
+* ⏳ Crop growth duration prediction
+* 📅 Sowing and harvest window estimation
+* 🌐 Web-based user interface
 
----
+🧠 Technologies Used
 
-## 🧠 Technologies Used
+Software
 
 * Python
 * Machine Learning (Scikit-learn)
@@ -28,11 +29,16 @@ The model is deployed through a Python backend and connected to a simple web-bas
 * Flask (Backend API)
 * HTML / CSS / JavaScript (Frontend)
 
----
+Hardware (IoT)
 
-## 📂 Project Structure
+* Microcontroller (Arduino / similar board)
+* Soil sensors
+* Environmental sensors
+* Data communication with backend system
 
-```id="m4ns7c"
+📂 Project Structure
+
+```id="o7v3gc"
 CropSense/
 │
 ├── backend/
@@ -49,53 +55,52 @@ CropSense/
 │   ├── crop_stages.csv
 │   └── fertilizer_data.csv
 │
+├── hardware/
+│   └── sensor_code.ino
+│
 ├── requirements.txt
 └── README.md
 ```
 
 ---
 
-## ⚙️ Installation
+⚙️ Installation
 
 1. Clone the repository
 
-```id="9l9sv8"
+```id="6ru85y"
 git clone https://github.com/yourusername/cropsense.git
 ```
 
-2. Navigate to the project folder
+2. Navigate to the project directory
 
-```id="czqgpw"
+```id="jnszzv"
 cd cropsense
 ```
 
-3. Install the required dependencies
+3. Install required dependencies
 
-```id="m3d89s"
+```id="f48h0c"
 pip install -r requirements.txt
 ```
 
----
+▶️ Running the Project
 
-## ▶️ Running the Project
+### Step 1 – Run Backend Server
 
-### Step 1 – Start the Backend Server
-
-Run the backend using Python:
-
-```id="dc9b1c"
+```id="qfypxz"
 python app.py
 ```
 
-This will start the Flask server.
+This starts the Flask server.
 
 ---
 
-### Step 2 – Open the Frontend
+### Step 2 – Open Frontend
 
-Navigate to the **frontend folder** and open:
+Navigate to the frontend folder and open:
 
-```id="m9o3sp"
+```id="3v6m1q"
 index.html
 ```
 
@@ -103,49 +108,21 @@ in your web browser.
 
 ---
 
-## 🧪 How to Use
+### Step 3 – Sensor Data Collection (Hardware)
 
-1. Enter soil nutrient values:
+IoT sensors collect field parameters such as:
 
-   * Nitrogen
-   * Phosphorus
-   * Potassium
+* Soil nutrients
+* Soil moisture
+* Temperature
+* Humidity
 
-2. Enter environmental conditions:
+These values can be transmitted to the system and used as input for the crop recommendation model.
 
-   * Temperature
-   * Humidity
-   * Rainfall
-   * Soil pH
+🌍 Impact
 
-3. Submit the form.
+CropSense helps farmers make **data-driven farming decisions** by combining **AI and IoT technologies**. This improves crop productivity, reduces resource wastage, and supports sustainable agriculture.
 
-4. CropSense will display:
+📜 License
 
-   * Recommended crop
-   * Suitable sowing month
-   * Growth duration
-   * Estimated harvest time
-   * Fertilizer recommendations
-   * Estimated fertilizer cost
-
----
-
-## 📊 Dataset
-
-The system uses agricultural datasets that contain information about soil nutrients, climate conditions, and crop requirements.
-
----
-
-## 📈 Future Improvements
-
-* Weather forecasting integration
-* Mobile application for farmers
-* IoT soil sensor integration
-* Satellite-based crop monitoring
-
----
-
-## 📜 License
-
-This project is created for educational and research purposes.
+This project is developed for educational and research purposes.
