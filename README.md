@@ -31,7 +31,7 @@ Software
 
 Hardware (IoT)
 
-* Microcontroller (Arduino / similar board)
+* Microcontroller
 * Soil sensors
 * Environmental sensors
 * Data communication with backend system
@@ -69,7 +69,7 @@ CropSense/
 1. Clone the repository
 
 ```id="6ru85y"
-git clone https://github.com/yourusername/cropsense.git
+git clone https://github.com/brindha4999/CropSense.git
 ```
 
 2. Navigate to the project directory
@@ -89,7 +89,7 @@ pip install -r requirements.txt
 ### Step 1 – Run Backend Server
 
 ```id="qfypxz"
-python app.py
+python backend.py
 ```
 
 This starts the Flask server.
@@ -98,10 +98,10 @@ This starts the Flask server.
 
 ### Step 2 – Open Frontend
 
-Navigate to the frontend folder and open:
+Open:
 
 ```id="3v6m1q"
-index.html
+frontend.html
 ```
 
 in your web browser.
