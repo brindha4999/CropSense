@@ -1,6 +1,6 @@
-🌾 CropSense – AI & IoT Based Smart Crop Recommendation System
+## 🌾 CropSense – AI & IoT Based Smart Crop Recommendation System
 
-📌 Project Description
+## 📌 Project Description
 
 CropSense is an **AI and IoT-based agriculture decision support system** that helps farmers choose the most suitable crop based on soil and environmental conditions.
 
@@ -8,7 +8,7 @@ The system uses **IoT sensors to collect real-time field data**, which is then p
 
 The project integrates **hardware sensors, machine learning models, and a web interface** to provide a complete smart farming solution.
 
-🚜 Features
+## 🚜 Features
 
 * 🌱 AI-based crop recommendation
 * 📡 Real-time data collection using IoT sensors
@@ -19,7 +19,7 @@ The project integrates **hardware sensors, machine learning models, and a web in
 * 📅 Sowing and harvest window estimation
 * 🌐 Web-based user interface
 
-🧠 Technologies Used
+## 🧠 Technologies Used
 
 Software
 
@@ -36,7 +36,7 @@ Hardware (IoT)
 * Environmental sensors
 * Data communication with backend system
 
-📂 Project Structure
+## 📂 Project Structure
 
 ```id="o7v3gc"
 CropSense/
@@ -64,7 +64,7 @@ CropSense/
 
 ---
 
-⚙️ Installation
+## ⚙️ Installation
 
 1. Clone the repository
 
@@ -84,7 +84,7 @@ cd cropsense
 pip install -r requirements.txt
 ```
 
-▶️ Running the Project
+## ▶️ Running the Project
 
 ### Step 1 – Run Backend Server
 
@@ -119,10 +119,10 @@ IoT sensors collect field parameters such as:
 
 These values can be transmitted to the system and used as input for the crop recommendation model.
 
-🌍 Impact
+## 🌍 Impact
 
 CropSense helps farmers make **data-driven farming decisions** by combining **AI and IoT technologies**. This improves crop productivity, reduces resource wastage, and supports sustainable agriculture.
 
-📜 License
+## 📜 License
 
 This project is developed for educational and research purposes.
