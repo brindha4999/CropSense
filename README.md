@@ -42,7 +42,7 @@ Hardware (IoT)
 CropSense/
 │
 ├── backend/
-│   └── app.py
+│   └── backend.py
 │
 ├── frontend/
 │   └── frontend.html
