@@ -8,7 +8,7 @@ The system uses **IoT sensors to collect real-time field data**, which is then p
 
 The project integrates **hardware sensors, machine learning models, and a web interface** to provide a complete smart farming solution.
 
-## 🚜 Features
+## ✨ Features
 
 * 🌱 AI-based crop recommendation
 * 📡 Real-time data collection using IoT sensors
@@ -45,7 +45,7 @@ CropSense/
 │   └── app.py
 │
 ├── frontend/
-│   └── index.html
+│   └── frontend.html
 │
 ├── models/
 │   └── crop_model.pkl
